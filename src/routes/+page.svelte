@@ -1,7 +1,12 @@
 <script lang="ts">
-	import {} from 'firebase/app';
+	import { auth, firestore, storage } from './firebase';
+	import { FirebaseApp, SignedIn, userStore } from 'sveltefire';
+
+	const user = userStore(auth);
 
 	let count = $state(0);
 </script>
 
-<button onclick={() => count++}>{count}</button>
+<FirebaseApp {auth} {firestore} {storage}>
+	<SignedIn></SignedIn>
+</FirebaseApp>
