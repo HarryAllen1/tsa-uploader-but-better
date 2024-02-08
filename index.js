@@ -8,7 +8,7 @@ import 'dotenv/config';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const browser = await launch({
-	headless: false
+	headless: false,
 });
 
 const page = await browser.newPage();
@@ -51,7 +51,7 @@ for (const user of data.filter((u) => u.events.length > 0)) {
 				(el, teamNumber) => {
 					el.value = String(teamNumber);
 				},
-				event.teamNumber
+				event.teamNumber,
 			);
 
 			if (event.isCaptain) {
