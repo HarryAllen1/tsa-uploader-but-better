@@ -1,34 +1,32 @@
-import { launch } from 'puppeteer';
+// @ts-check
+
+import puppeteer from 'puppeteer-extra';
 import { data } from './data.js';
 import 'dotenv/config';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+
+puppeteer.use(StealthPlugin());
 
 /**
  * @param {number} ms
  */
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const browser = await launch();
+const browser = await puppeteer.launch({
+	headless: false,
+	timeout: 0,
+});
 
 const page = await browser.newPage();
+page.setUserAgent(
+	'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+);
 await page.goto('https://www.registermychapter.com/tsa/wa/Register.asp');
-await page.$eval(
-	'input[name="UserName"]',
-	(el, process) => {
-		el.value = process.env.USERNAME;
-	},
-	process,
-);
-await page.$eval(
-	'input[name="Password"]',
-	(el, process) => {
-		el.value = process.env.PASSWORD;
-	},
-	process,
-);
-await page.$eval('input[name="SubmitBtn"]', (el) => {
-	el.click();
+
+await page.waitForNavigation({
+	timeout: 0,
 });
-await page.waitForNavigation();
+await page.waitForSelector('a[href="SchoolInfo.asp"');
 for (const user of data.filter((u) => u.events.length > 0)) {
 	console.log(user.email);
 	await page.goto(`https://www.registermychapter.com/tsa/wa/AddRegister.asp?PID=${user.waId}`);
