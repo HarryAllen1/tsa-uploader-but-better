@@ -2,6 +2,20 @@
 
 Created to streamline registering for WTSA state and regionals.
 
+## Initially Adding Members
+
+Before you can add events to members, you have to register everyone. Click "Add Students" at the bottom, click search, and run the following script in the console to automatically change everyone's attendance to "Competition Registration." Make sure you go over and ensure that it didn't select people it shouldn't have.
+
+```js
+document
+	.querySelector('#f')
+	.querySelectorAll('select[onchange]')
+	.forEach((el) => {
+		el.value = 'S';
+		el.onchange();
+	});
+```
+
 ## Setup
 
 Download Chrome, Node.js and PNPM.
