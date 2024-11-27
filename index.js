@@ -12,9 +12,8 @@ puppeteer.use(StealthPlugin());
  */
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const browser = await puppeteer.launch({
-	headless: false,
-	timeout: 0,
+const browser = await puppeteer.connect({
+	browserWSEndpoint: process.env.WSS_ENDPOINT_URL,
 });
 
 const page = await browser.newPage();
@@ -23,9 +22,6 @@ page.setUserAgent(
 );
 await page.goto('https://www.registermychapter.com/tsa/wa/Register.asp');
 
-await page.waitForNavigation({
-	timeout: 0,
-});
 await page.waitForSelector('a[href="SchoolInfo.asp"');
 for (const user of data.filter((u) => u.events.length > 0)) {
 	console.log(user.email);
@@ -37,77 +33,49 @@ for (const user of data.filter((u) => u.events.length > 0)) {
 			continue;
 		}
 	} else {
-		if (user.gender === 'Male' || user.gender === 'Non-Binary') {
-			switch (user.tShirt) {
-				case 'WXS':
-					user.tShirt = 'M XS';
-					break;
-				case 'S':
-					user.tShirt = 'M Small';
-					break;
-				case 'M':
-					user.tShirt = 'M Medium';
-					break;
-				case 'L':
-					user.tShirt = 'M Large';
-					break;
-				case 'XL':
-					user.tShirt = 'M XL';
-					break;
-				case 'XXL':
-					user.tShirt = 'M XXL';
-					break;
+		switch (user.tShirt.split(' ')[1]) {
+			case 'S': {
+				user.tShirt += 'mall';
+				break;
 			}
-		} else {
-			switch (user.tShirt) {
-				case 'WXS':
-					user.tShirt = 'W XS';
-					break;
-				case 'S':
-					user.tShirt = 'W Small';
-					break;
-				case 'M':
-					user.tShirt = 'W Medium';
-					break;
-				case 'L':
-					user.tShirt = 'W Large';
-					break;
-				case 'XL':
-					user.tShirt = 'W XL';
-					break;
-				case 'XXL':
-					user.tShirt = 'W XXL';
-					break;
+			case 'M': {
+				user.tShirt += 'edium';
+				break;
+			}
+			case 'L': {
+				user.tShirt += 'arge';
+				break;
 			}
 		}
+
 		await page.select('select[name="TShirtSize"]', user.tShirt);
 	}
 	await page.$$eval('input[name="Sel"]', (els) => {
-		els.forEach((el) => {
-			if (!el.checked) return;
-			el.click();
-		});
+		for (const element of els) {
+			if (!element.checked) continue;
+			element.click();
+		}
 	});
 
 	for (const event of user.events) {
-		await page.$eval(`input[name="Sel"][value="${event.eventId}"]`, (el) => {
-			if (el.checked) return;
-			el.click();
+		await page.$eval(`input[name="Sel"][value="${event.eventId}"]`, (element) => {
+			if (element.checked) return;
+			element.click();
 		});
 
 		if (event.isTeamEvent) {
 			await page.$eval(
 				`input[name="TeamNo${event.eventId}"]`,
-				(el, teamNumber) => {
-					el.value = String(teamNumber);
+				(element, teamNumber) => {
+					element.value = String(teamNumber);
 				},
 				event.teamNumber,
 			);
 
 			if (event.isCaptain) {
-				await page.$eval(`input[name="TeamCaptain${event.eventId}"]`, (el) => {
-					if (el.checked) return;
-					el.click();
+				await page.$eval(`input[name="TeamCaptain${event.eventId}"]`, (element) => {
+					if (element.checked) return;
+					element.click();
 				});
 			}
 		}
@@ -117,5 +85,4 @@ for (const user of data.filter((u) => u.events.length > 0)) {
 	await sleep(1000);
 }
 
-await page.close();
-await browser.close();
+await page.goto('https://www.registermychapter.com/tsa/wa/Register.asp');
