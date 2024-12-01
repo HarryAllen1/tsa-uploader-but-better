@@ -30,7 +30,7 @@ Go to [http://localhost:9222/json/version](http://localhost:9222/json/version) a
 
 Clone this repo, install dependencies with `pnpm i`, then create a `.env` file. Populate the following variables:
 
-```properties
+```[.env]
 # regionals or state. State requires tShirtSize (see below)
 MODE=""
 # webSocketDebuggerUrl value
@@ -86,4 +86,4 @@ document
 	});
 ```
 
-Then, in your launched Chrome instance, open a new tab, visit [https://www.registermychapter.com/tsa/wa/Register.asp](https://www.registermychapter.com/tsa/wa/Register.asp), and log in. Then, with that tab open, run `node .`.
+Then, in your launched Chrome instance, open a new tab, visit [https://www.registermychapter.com/tsa/wa/Register.asp](https://www.registermychapter.com/tsa/wa/Register.asp), and log in. Then, with that tab open, run `node .`. The program will navigate to each user and set their events.
