@@ -12,3 +12,5 @@ vite.config.ts.timestamp-*
 *.log
 
 data.js
+
+/screenshots/*.png

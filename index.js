@@ -16,40 +16,34 @@ const browser = await puppeteer.connect({
 	browserWSEndpoint: process.env.WSS_ENDPOINT_URL,
 });
 
-const page = await browser.newPage();
+const page = (await browser.pages())[0];
 page.setUserAgent(
 	'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
 );
-await page.goto('https://www.registermychapter.com/tsa/wa/Register.asp');
+// await page.goto('https://www.registermychapter.com/tsa/wa/Register.asp');
 
 await page.waitForSelector('a[href="SchoolInfo.asp"');
 for (const user of data.filter((u) => u.events.length > 0)) {
 	console.log(user.email);
 	await page.goto(`https://www.registermychapter.com/tsa/wa/AddRegister.asp?PID=${user.waId}`);
 
-	if (process.env.MODE === 'regionals') {
-		if (await page.$('.errmsg')) {
-			console.log('Error found; skipping');
-			continue;
+	switch (user.tShirt.split(' ')[1]) {
+		case 'S': {
+			user.tShirt += 'mall';
+			break;
 		}
-	} else {
-		switch (user.tShirt.split(' ')[1]) {
-			case 'S': {
-				user.tShirt += 'mall';
-				break;
-			}
-			case 'M': {
-				user.tShirt += 'edium';
-				break;
-			}
-			case 'L': {
-				user.tShirt += 'arge';
-				break;
-			}
+		case 'M': {
+			user.tShirt += 'edium';
+			break;
 		}
-
-		await page.select('select[name="TShirtSize"]', user.tShirt);
+		case 'L': {
+			user.tShirt += 'arge';
+			break;
+		}
 	}
+
+	await page.select('select[name="TShirtSize"]', user.tShirt);
+
 	await page.$$eval('input[name="Sel"]', (els) => {
 		for (const element of els) {
 			if (!element.checked) continue;
@@ -86,3 +80,5 @@ for (const user of data.filter((u) => u.events.length > 0)) {
 }
 
 await page.goto('https://www.registermychapter.com/tsa/wa/Register.asp');
+console.log('Complete');
+await browser.disconnect();
